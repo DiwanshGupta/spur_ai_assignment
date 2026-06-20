@@ -1,0 +1,137 @@
+## Getting Started
+
+### Prerequisites
+
+* Node.js v18+
+* PostgreSQL installed and running
+* A Gemini API key (free from https://aistudio.google.com/apikey)
+
+### 1. Clone the repo
+
+```bash
+git clone <your-repo-url>
+cd spur
+```
+
+### 2. Backend setup
+
+```bash
+cd server
+npm install
+```
+
+Create a `.env` file in `server/` with:
+
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/spur_db
+GEMINI_API_KEY=your_gemini_api_key_here
+PORT=3000
+```
+
+### Database Schema
+
+Create the database:
+
+```sql
+CREATE DATABASE spur_db;
+```
+
+Connect to the database and create the required tables:
+
+```sql
+CREATE TABLE IF NOT EXISTS conversations (
+    id UUID PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id UUID PRIMARY KEY,
+    conversation_id UUID NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT fk_conversation
+        FOREIGN KEY (conversation_id)
+        REFERENCES conversations(id)
+        ON DELETE CASCADE
+);
+```
+
+Alternatively, create a `src/db/schema.sql` file and run:
+
+```bash
+psql spur_db < src/db/schema.sql
+```
+
+Run the backend in development mode:
+
+```bash
+npm run dev
+```
+
+Backend will run on:
+
+```text
+http://localhost:3000
+```
+
+### 3. Frontend setup
+
+```bash
+cd client
+npm install
+```
+
+Create a `.env` file in `client/` with:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Run the frontend:
+
+```bash
+npm run dev
+```
+
+Frontend will run on:
+
+```text
+http://localhost:5173
+```
+
+### Features
+
+* Real-time conversational AI support agent
+* Conversation/session management
+* Persistent chat history using PostgreSQL
+* FAQ-aware responses using store knowledge
+* Gemini LLM integration
+* Responsive React + TypeScript frontend
+* Express + TypeScript backend
+* Error handling and loading states
+
+
+## Future Improvements
+
+If given more time, the following enhancements could be implemented:
+
+### Real-Time Streaming Responses
+* Integrate Socket.IO for real-time bidirectional communication between the client and server.
+* Stream AI responses token-by-token for a more interactive user experience.
+* Alternatively, implement client-side polling for periodic updates if WebSockets are not required.
+
+### User Authentication
+* Currently, conversations are tracked using a generated session ID stored on the client.
+* Introduce user authentication (JWT, OAuth, or session-based auth) to associate conversations with registered users.
+* Enable users to access their conversation history across devices and sessions.
+
+### Knowledge Base Improvements
+
+* Store FAQ and support content in the database instead of hardcoding.
+* Implement Retrieval-Augmented Generation (RAG) to provide more accurate, context-aware responses from a larger knowledge base.
+
+### Production Enhancements
+* Rate limiting and abuse protection.
+* Input validation and sanitization.
